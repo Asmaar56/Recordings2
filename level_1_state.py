@@ -3,6 +3,7 @@ import pygame
 
 from IAppState import IAppState
 from player import Player
+from object_1 import Object1
 
 from pygame_gui import UIManager
 from pygame import KEYDOWN
@@ -22,6 +23,7 @@ class Level1State(IAppState):
 
         # variables
         self.player = None
+        self.object_1 = None
 
     def start(self):  # called when this state first appears
 
@@ -36,6 +38,10 @@ class Level1State(IAppState):
         player_position = (self.window_surface.get_rect().centerx,
                            self.window_surface.get_rect().bottom - 50)
         self.player = Player(player_position)
+
+        object_1_position = (self.window_surface.get_rect().centerx + 100,
+                             self.window_surface.get_rect().bottom - 100)
+        self.object_1 = Object1(player_position)
 
     def stop(self):  # called when state is closed
         self.background_surface = None  # remove background
@@ -53,11 +59,13 @@ class Level1State(IAppState):
 
     def update(self, time_delta: float):  # update takes time as parameter
         self.player.update(time_delta)
+        self.object_1.update(time_delta)
         self.ui_manager.update(time_delta=time_delta)
 
     def draw(self):  # draws buttons onto window
         self.window_surface.blit(self.background_surface, (0, 0))
         self.ui_manager.draw_ui(self.window_surface)  # draws ui elements onto window
         self.player.draw(self.window_surface)
+        self.object_1.draw(self.window_surface)
         # pygame.draw.rect(self.window_surface, self.player.colour, self.player.pos_rect)
 

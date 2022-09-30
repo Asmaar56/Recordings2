@@ -44,21 +44,16 @@ class Player():  # create player class
             self.move_down = True
             self.position.y += self.speed
 
-        # ADWHDHW O  ADD COMMENTS
         x, y = pygame.mouse.get_rel()
         self.current_rotation = self.current_rotation - (x * time_delta * self.rotation_speed)
         #print(self.current_rotation)
 
     def update(self, time_delta):
         self.movement(time_delta)
-          # reset centre CHANGE THIS COMMENT
 
         self.current_image = pygame.transform.rotate(self.original_image, self.current_rotation)
         self.pos_rect.size = self.current_image.get_size()
         self.pos_rect.center = (int(self.position.x), int(self.position.y))
 
-
-
     def draw(self, target_surface):
-
         target_surface.blit(self.current_image, self.pos_rect)
