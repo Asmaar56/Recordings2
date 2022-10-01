@@ -25,6 +25,23 @@ class Level1State(IAppState):
         self.player = None
         self.object_1 = None
 
+        self.tile_list = []
+        self.tile_size = 50
+        self.block_img = pygame.image.load('game-images/block.png')
+
+        self.worldData = [
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+
     def start(self):  # called when this state first appears
 
         # add a background to the window
@@ -39,9 +56,30 @@ class Level1State(IAppState):
                            self.window_surface.get_rect().bottom - 50)
         self.player = Player(player_position)
 
+        # create obstacles
         object_1_position = (self.window_surface.get_rect().centerx + 100,
                              self.window_surface.get_rect().bottom - 100)
-        self.object_1 = Object1(player_position)
+
+        self.object_1 = Object1(object_1_position)
+        self.make_world()
+
+
+    def make_world(self):
+
+        row_counter = 0
+        for row in self.worldData:
+            column_counter = 0
+            for tile in row:
+                if tile == 1:
+                    img = pygame.transform.scale(self.block_img, (self.tile_size, self.tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = column_counter * self.tile_size
+                    img_rect.y = row_counter * self.tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
+                column_counter += 1
+            row_counter += 1
+
 
     def stop(self):  # called when state is closed
         self.background_surface = None  # remove background
@@ -64,6 +102,9 @@ class Level1State(IAppState):
 
     def draw(self):  # draws buttons onto window
         self.window_surface.blit(self.background_surface, (0, 0))
+        for tile in self.tile_list:
+            self.window_surface.blit(tile[0], tile[1])
+
         self.ui_manager.draw_ui(self.window_surface)  # draws ui elements onto window
         self.player.draw(self.window_surface)
         self.object_1.draw(self.window_surface)
