@@ -1,17 +1,20 @@
-# import all libraries
-import pygame
+# import pygame
+from pygame import Surface, Rect
+from pygame.event import Event
 
-from IAppState import IAppState
-
+# import pygame_gui
 from pygame_gui import UIManager, UI_BUTTON_PRESSED
 from pygame_gui.elements import UIButton
 
+# import parent class
+from IAppState import IAppState
 
-class EquipmentState(IAppState):
+
+class EquipmentState(IAppState):  # class inherits from IAppState
 
     # init takes 2 parameters: window_surface and ui_manager from MainApp
     def __init__(self,
-                 window_surface: pygame.Surface,
+                 window_surface: Surface,
                  window_size,
                  ui_manager: UIManager):
 
@@ -25,14 +28,14 @@ class EquipmentState(IAppState):
     def start(self):  # called when this state first appears
 
         # add a background to the window
-        self.background_surface = pygame.Surface(self.window_size)
+        self.background_surface = Surface(self.window_size)
         self.background_surface.fill((0, 0, 0))  # set background to black so it erases all button images
 
         self.should_transition = False  # should switch to another state?
         self.transition_target = 'None'  # target state?
 
         # create return to player menu button
-        return_to_player_menu_button_pos_rect = pygame.Rect(0, 0, 150, 40)
+        return_to_player_menu_button_pos_rect = Rect(0, 0, 150, 40)
         return_to_player_menu_button_pos_rect.centerx = self.window_surface.get_rect().centerx
         return_to_player_menu_button_pos_rect.top = self.window_surface.get_height() * 0.8
         self.return_to_player_menu_button = UIButton(relative_rect=return_to_player_menu_button_pos_rect,
@@ -45,7 +48,7 @@ class EquipmentState(IAppState):
         self.return_to_player_menu_button.kill()  # destroy button
         self.return_to_player_menu_button = None  # reset button variable
 
-    def process_event(self, event: pygame.event.Event):  # takes event as parameter
+    def process_event(self, event: Event):  # takes event as parameter
         self.ui_manager.process_events(event)  # call  builtin process_events
 
         if event.type == UI_BUTTON_PRESSED:  # if a button is pressed

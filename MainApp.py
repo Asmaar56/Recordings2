@@ -1,8 +1,10 @@
-# import all libraries
+# import pygame
 import pygame
 
+# import pygame_gui
 from pygame_gui import UIManager
 
+# import menu states and levels
 from initial_state import InitialState
 from main_menu_state import MainMenuState
 from select_level_state import SelectLevelState
@@ -78,7 +80,7 @@ class MainApp:
     # main game loop
     def run(self):
         while self.is_running:  # check if running
-            time_delta = self.clock.tick(60)/1000.0
+            time_delta = self.clock.tick(60)/1000.0  # time since last frame
             for event in pygame.event.get():  # receive events
                 if event.type == pygame.QUIT:  # if X button is pressed
                     self.is_running = False  # quit game

@@ -1,12 +1,17 @@
-# import all libraries
+# import libraries
 import pygame
 
+# import parent class
 from IAppState import IAppState
-from player import Player
-from object_1 import Object1
 
+# import elements and events
 from pygame_gui import UIManager
 from pygame import KEYDOWN
+
+# import player
+from player import Player
+
+from object_1 import Object1
 
 
 class Level1State(IAppState):
@@ -25,11 +30,13 @@ class Level1State(IAppState):
         self.player = None
         self.object_1 = None
 
+        # level variables
         self.tile_list = []
         self.tile_size = 50
         self.block_img = pygame.image.load('game-images/block.png')
 
-        self.worldData = [
+        # level information
+        self.level_data = [
             [0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
             [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -56,18 +63,16 @@ class Level1State(IAppState):
                            self.window_surface.get_rect().bottom - 50)
         self.player = Player(player_position)
 
-        # create obstacles
+        # create objects
         object_1_position = (self.window_surface.get_rect().centerx + 100,
                              self.window_surface.get_rect().bottom - 100)
 
         self.object_1 = Object1(object_1_position)
-        self.make_world()
+        self.make_level()
 
-
-    def make_world(self):
-
+    def make_level(self):  # build the level by adding images on the screen
         row_counter = 0
-        for row in self.worldData:
+        for row in self.level_data:
             column_counter = 0
             for tile in row:
                 if tile == 1:
@@ -80,11 +85,10 @@ class Level1State(IAppState):
                 column_counter += 1
             row_counter += 1
 
-
     def stop(self):  # called when state is closed
         self.background_surface = None  # remove background
 
-        self.player = None
+        self.player = None  # kill player
 
     def process_event(self, event: pygame.event.Event):  # takes event as parameter
         self.ui_manager.process_events(event)  # call  builtin process_events
@@ -100,13 +104,13 @@ class Level1State(IAppState):
         self.object_1.update(time_delta)
         self.ui_manager.update(time_delta=time_delta)
 
-    def draw(self):  # draws buttons onto window
+    def draw(self):  # draw changes onto window
         self.window_surface.blit(self.background_surface, (0, 0))
-        for tile in self.tile_list:
+
+        for tile in self.tile_list:  # draw level
             self.window_surface.blit(tile[0], tile[1])
 
         self.ui_manager.draw_ui(self.window_surface)  # draws ui elements onto window
         self.player.draw(self.window_surface)
         self.object_1.draw(self.window_surface)
-        # pygame.draw.rect(self.window_surface, self.player.colour, self.player.pos_rect)
 
