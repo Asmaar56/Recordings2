@@ -10,7 +10,7 @@ from pygame_gui.elements import UILabel
 from IAppState import IAppState
 
 
-class InitialState(IAppState):
+class InitialState(IAppState):  # class inherits from IAppState
 
     # init takes 2 parameters: window_surface and ui_manager from MainApp
     def __init__(self,

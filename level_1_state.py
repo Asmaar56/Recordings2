@@ -14,7 +14,7 @@ from player import Player
 from object_1 import Object1
 
 
-class Level1State(IAppState):
+class Level1State(IAppState):  # class inherits from IAppState
 
     # init takes 2 parameters: window_surface and ui_manager from MainApp
     def __init__(self,
