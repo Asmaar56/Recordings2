@@ -1,4 +1,5 @@
 import pygame
+from bullet import Bullet
 
 
 class Player:  # create player class
@@ -17,6 +18,8 @@ class Player:  # create player class
         self.move_right = False
         self.move_up = False
         self.move_down = False
+
+        self.shooting = False
 
         # mouse rotation variables
         self.rotation_speed = 100.0
@@ -62,3 +65,6 @@ class Player:  # create player class
 
     def draw(self, target_surface):  # draw player image
         target_surface.blit(self.current_image, self.view_pos_rect)
+
+    def shoot(self):
+
