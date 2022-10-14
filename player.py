@@ -10,6 +10,7 @@ class Player:  # create player class
         self.pos_rect.center = (int(self.position.x), int(self.position.y))  # set centre using self.position
         self.colour = pygame.Color("#00FF00")  # this will be removed after an image takes its place
 
+        self.view_pos_rect = self.pos_rect.copy()
         # movement variables
         self.speed = 5
         self.move_left = False
@@ -49,13 +50,15 @@ class Player:  # create player class
         relative_mouse_x, relative_mouse_y = pygame.mouse.get_rel()
         self.current_rotation = self.current_rotation - (relative_mouse_x * time_delta * self.rotation_speed)
 
-    def update(self, time_delta):  # update takes time since last frame as parameter
+    def update(self, time_delta, camera):  # update takes time since last frame as parameter
         self.movement(time_delta)  # check for movement
 
         # rotate the image of the player when the mouse is moved
         self.current_image = pygame.transform.rotate(self.original_image, self.current_rotation)
         self.pos_rect.size = self.current_image.get_size()  # resize the image in case it has changed size
         self.pos_rect.center = (int(self.position.x), int(self.position.y))  # recenter the image incase it has shifted
+        self.view_pos_rect.centerx = self.pos_rect.centerx - camera.viewport_rect.left
+        self.view_pos_rect.centery = self.pos_rect.centery - camera.viewport_rect.top
 
     def draw(self, target_surface):  # draw player image
-        target_surface.blit(self.current_image, self.pos_rect)
+        target_surface.blit(self.current_image, self.view_pos_rect)

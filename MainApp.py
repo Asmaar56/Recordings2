@@ -5,18 +5,18 @@ import pygame
 from pygame_gui import UIManager
 
 # import menu states and levels
-from initial_state import InitialState
-from main_menu_state import MainMenuState
-from select_level_state import SelectLevelState
-from test_state import TestState
-from options_state import OptionsState
-from high_scores_state import HighScoresState
-from character_design_state import CharacterDesignState
-from player_menu_state import PlayerMenuState
-from new_character_state import NewCharacterState
-from equipment_state import EquipmentState
-from load_prior_data_state import LoadPriorDataState
-from level_1_state import Level1State
+from menu_states.initial_state import InitialState
+from menu_states.main_menu_state import MainMenuState
+from menu_states.select_level_state import SelectLevelState
+from menu_states.test_state import TestState
+from menu_states.options_state import OptionsState
+from menu_states.high_scores_state import HighScoresState
+from menu_states.character_design_state import CharacterDesignState
+from menu_states.player_menu_state import PlayerMenuState
+from menu_states.new_character_state import NewCharacterState
+from menu_states.equipment_state import EquipmentState
+from menu_states.load_prior_data_state import LoadPriorDataState
+from level_states.level_1_state import Level1State
 
 
 # Create main game app
