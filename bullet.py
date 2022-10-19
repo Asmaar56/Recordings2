@@ -1,7 +1,8 @@
 import pygame
 from typing import Tuple
 
-class Bullet():
+
+class Bullet:
     def __init__(self,
                  bullet_image,
                  start_position: Tuple[int, int],
