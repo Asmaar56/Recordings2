@@ -1,3 +1,87 @@
+import pygame
+
+import pygame_gui
+from IAppState import IAppState
+
+from player import Player
+from camera import Camera
+
+
+class Level1State(IAppState):
+
+    def __init__(self,
+                 window_surface: pygame.Surface,
+                 window_size,
+                 ui_manager: pygame_gui.UIManager):
+        super().__init__(window_surface,
+                         window_size,
+                         ui_manager)
+
+        self.window_size = window_size
+        self.background_texture = None
+        self.background_position = (0, 0)
+        self.window_surface = window_surface
+
+        self.ui_manager = ui_manager
+        self.all_sprites = None
+
+        self.world_bounds = (1280, 720)
+
+        self.player = None
+
+        self.camera = None
+
+    def start(self):
+
+        world_centre = pygame.Vector2(self.window_size)
+
+        self.camera = Camera(world_centre, pygame.Rect((0, 0), self.window_size), pygame.Rect((0, 0), self.world_bounds))
+
+        player_texture = pygame.image.load('level_states/game_images/gunman_2.png')
+        self.player = Player(player_texture, self.world_bounds, self.window_surface)
+
+        #  background texture for the level
+        self.background_texture = pygame.transform.smoothscale(
+            pygame.image.load('level_states/game_images/background_image.jpg').convert(), self.world_bounds)
+
+    def stop(self):
+        pass
+
+    def process_event(self, event: pygame.event.Event):
+        self.ui_manager.process_events(event)
+        self.player.process_events(event)
+
+        if event.type == pygame.KEYDOWN:  # if any keyboard key is pressed
+            if event.key == pygame.K_p:  # return to menu
+                self.should_transition = True  # this is returned in return_should_transition()
+                self.transition_target = 'main_menu_state'  # switch to main menu
+                print('KEY P pressed in LEVEL1STATE')
+
+            if event.key == pygame.K_c:
+                self.player.kill()
+
+    def update(self, time_delta: float):
+        self.camera.update(time_delta, self.player.position)
+
+        self.player.update(time_delta, self.camera)
+        self.ui_manager.update(time_delta)
+
+    def draw(self):
+
+        # checks to see if the background should stop moving
+        background_view_pos = (self.background_position[0] - self.camera.viewport_rect.left,
+                               self.background_position[1] - self.camera.viewport_rect.top)
+        self.window_surface.blit(self.background_texture, background_view_pos)  # draws background image onto display
+
+        self.player.draw(self.window_surface)
+        self.ui_manager.draw_ui(self.window_surface)
+
+
+
+
+
+'''
+
 # import libraries
 import pygame
 
@@ -15,6 +99,9 @@ from camera import Camera
 from player import Player
 
 from object_1 import Object1
+
+from asteroid import Asteroid
+from random import randint
 
 
 class Level1State(IAppState):  # class inherits from IAppState
@@ -41,34 +128,44 @@ class Level1State(IAppState):  # class inherits from IAppState
         self.block_img = pygame.image.load('level_states/game_images/block.png')
 
         self.all_sprites = None  # images
+        
+        self.world_bounds = self.window_size
+        
+        # asteroid variables
+        self.make_asteroid = False  # make an asteroid or not
+        self.asteroid_texture = pygame.image.load('textures/asteroid.png').convert_alpha()
+        self.asteroid_list = []  # contains all asteroids
+        self.asteroid_creation_rate = 1.0  # time between asteroid creation
+        self.asteroid_creation_timer = 0.0  # counter since last asteroid creation
+
 
         # level information
         self.level_data = [
             [0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
             [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
         ]
 
     def start(self):  # called when this state first appears
-
+        
+        world_centre = pygame.Vector2(self.window_size)
+        self.camera = Camera(world_centre, pygame.Rect((0, 0), self.display_size),
+                             pygame.Rect((0, 0), self.world_bounds))
+        
         # add a background to the window
         self.background_surface = pygame.Surface(self.window_size)
         self.background_surface.fill((0, 0, 0))  # set background to black so it erases all button images
 
         self.should_transition = False  # should switch to another state?
-        self.transition_target = 'None'  # target state?
-
-        # make camera
-        world_centre = pygame.Vector2(self.window_size)
-        self.camera = Camera(world_centre, pygame.Rect((0, 0), self.window_size))
-
+        self.transition_target = 'None'  # target state
+        
         # create sprite groups
         self.all_sprites = pygame.sprite.Group()
 
@@ -76,11 +173,13 @@ class Level1State(IAppState):  # class inherits from IAppState
         player_position = (self.window_surface.get_rect().centerx,
                            self.window_surface.get_rect().bottom - 50)
         player_image = pygame.image.load('level_states/game_images/gunman_2.png')
-        player_bullet_image = pygame.image.load('level_states/game_images/laser.jpg')
+        player_bullet_image = pygame.image.load('level_states/game_images/laser2.png')
+        
         self.player = Player(image=player_image,
                              bullet_image=player_bullet_image,
                              position=player_position,
-                             all_sprites_group=self.all_sprites)
+                             all_sprites_group=self.all_sprites,
+                             window_surface=self.window_surface)
 
         # create objects
         object_1_position = (self.window_surface.get_rect().centerx + 100,
@@ -131,7 +230,7 @@ class Level1State(IAppState):  # class inherits from IAppState
 
     def update(self, time_delta: float):  # update takes time as parameter
         self.camera.update(time_delta, self.player.position)
-        self.player.update(time_delta, self.camera)
+        #self.player.update(time_delta, self.camera)
         self.all_sprites.update(time_delta, self.camera)
         for tile in self.tile_list:  # draw level
             tile[2].x = tile[1].x - self.camera.viewport_rect.left
@@ -149,3 +248,4 @@ class Level1State(IAppState):  # class inherits from IAppState
         self.ui_manager.draw_ui(self.window_surface)  # draws ui elements onto window
         #self.player.draw(self.window_surface)
         self.object_1.draw(self.window_surface)
+        '''
