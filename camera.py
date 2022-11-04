@@ -5,15 +5,17 @@ class Camera:
     def __init__(self, start_world_pos: pygame.Vector2,
                  viewport_rect: pygame.Rect,
                  world_bounds: pygame.Rect):
-        self.position = start_world_pos
-        self.viewport_rect = viewport_rect
-        self.world_bounds = world_bounds
+        self.position = start_world_pos  # camera pos is the player's pos
+        self.viewport_rect = viewport_rect  # viewport is what the camera sees
+        self.world_bounds = world_bounds  # camera boundaries
 
     #  updates the camera according to the viewport position and the world bounds
-    def update(self, dt, player_position: pygame.Vector2):
+    def update(self, time_delta, player_position: pygame.Vector2):
+        # set camera pos to player pos
         self.position.x = player_position.x
         self.position.y = player_position.y
 
+        # set viewport to player pos
         self.viewport_rect.center = self.position
 
         if self.viewport_rect.left < self.world_bounds.left:

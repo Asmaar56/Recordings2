@@ -1,52 +1,56 @@
 import pygame
-from pygame import Rect
 from level_states.bullet import Bullet
 
 
-class Player:
+class Player(pygame.sprite.Sprite):
     def __init__(self,
                  player_texture,
                  world_bounds,
-                 window_surface):
+                 window_surface,
+                 player_shots_group: pygame.sprite.Group,
+                 player_collision_group: pygame.sprite.Group,
+                 all_sprites_group: pygame.sprite.Group):
 
+        super().__init__(all_sprites_group)
+        self.all_sprites_group = all_sprites_group
+        self.player_shots_group = player_shots_group
+        self.player_collision_group = player_collision_group
+
+        # initialise parameters
         self.world_bounds = world_bounds
         self.window_surface = window_surface
-
-
         self.original_image = player_texture
+        # make a copy of the player's image
         self.image = self.original_image.copy()
-        self.rect = self.image.get_rect()
-        self.image_scale = 0.5
+        self.rect = self.image.get_rect()  # set rect to have same boundaries as image
+        self.image_scale = 0.5  # resize the iamge
 
         self.position = pygame.Vector2(500.0, 400.0)  # spawn location for the player
-        self.pos_rect = Rect(0, 0, 53, 64)  # pygame rect for the player, scaled at the player image size
-        self.pos_rect.center = (int(self.position.x), int(self.position.y))
+        self.rect.center = (int(self.position.x), int(self.position.y))
+        self.view_pos_rect = self.rect.copy()  # set dimensions to pos rect dimensions
+        self.world_facing_vector = pygame.Vector2(0.0, -1.0)  # vertically upwards for rotation
 
-        self.speed = 200.0  # player speed (in pixels)
-        self.move_left = False
-        self.move_right = False
-        self.move_up = False
+        self.speed = 300.0  # player speed (in pixels)
+        self.move_up = False  # is movement key pressed?
         self.move_down = False
 
         self.rotate_left = False
         self.rotate_right = False
         self.current_rotation = 0.0
 
-        self.world_facing_vector = pygame.Vector2(0.0, -1.0)
+        # shooting variables
+        self.shooting = False  # has shooting button been pressed?
+        self.ready_to_shoot = False
+        self.bullet_texture = pygame.image.load('level_states/game_images/laser2.png')  # load in bullet image
+        self.bullet_list = []  # contains all bullets fired
+        self.shooting_fire_rate = 1.0  # time between bullet creation
+        self.shooting_fire_timer = 0.0  # counter since last bullet creation
 
-        self.player_texture = pygame.image.load('level_states/game_images/gunman_2.png').convert_alpha()  # player texture, loaded from texture folder
-
-        self.view_pos_rect = self.pos_rect.copy()
-        # asteroid variables
-        self.shooting = False  # make an asteroid or not
-        self.bullet_texture = pygame.image.load('level_states/game_images/laser2.png')
-        self.bullet_list = []  # contains all asteroids
-        self.bullet_fire_rate = 1.0  # time between asteroid creation
-        self.bullet_fire_timer = 0.0  # counter since last asteroid creation
+        self.coins_collected = 0
 
     def process_events(self, event):
         # inputs are handled here
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:  # is key pressed?
             if event.key == pygame.K_w:
                 self.move_up = True
             if event.key == pygame.K_s:
@@ -54,7 +58,7 @@ class Player:
             if event.key == pygame.K_f:
                 self.shooting = True
 
-        if event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP:  # is key unpressed?
             if event.key == pygame.K_w:
                 self.move_up = False
             if event.key == pygame.K_s:
@@ -63,59 +67,82 @@ class Player:
                 self.shooting = False
 
     def update(self, time_delta, camera):
+        if self.alive():
+            # check if player touched coin
+            player_coin_collisions = pygame.sprite.spritecollide(self,
+                                                                 self.player_collision_group,
+                                                                 False)
+            # kill player and coin if they touch
+            if player_coin_collisions:
+                for coin in player_coin_collisions:
+                    coin.kill()
+                    self.coins_collected += 1
+            self.rect.center = self.position
 
-        mouse_screen_pos = pygame.mouse.get_pos()
-        world_mouse_pos = pygame.Vector2(mouse_screen_pos[0]+camera.viewport_rect.left,
-                                         mouse_screen_pos[1]+camera.viewport_rect.top)
-        # recalculate facing vector
-        self.world_facing_vector = (world_mouse_pos - self.position).normalize()
+            # rotation needs mouse position relative to upwards facing vector
+            mouse_screen_pos = pygame.mouse.get_pos()
+            world_mouse_pos = pygame.Vector2(mouse_screen_pos[0]+camera.viewport_rect.left,
+                                             mouse_screen_pos[1]+camera.viewport_rect.top)
+            # recalculate facing vector
+            self.world_facing_vector = (world_mouse_pos - self.position).normalize()
+            # set current rotation to the angle to the vertical axis
+            upward_facing_vector = pygame.Vector2(0.0, -1.0)
+            self.current_rotation = -upward_facing_vector.angle_to(self.world_facing_vector)
 
-        upward_facing_vector = pygame.Vector2(0.0, -1.0)
-        self.current_rotation = -upward_facing_vector.angle_to(self.world_facing_vector)
+            # rotate the image of the player when the mouse is moved
+            self.image = pygame.transform.rotozoom(self.original_image,
+                                                   self.current_rotation,
+                                                   self.image_scale)  # resize the image
 
-        # rotate the image of the player when the mouse is moved
-        self.image = pygame.transform.rotozoom(self.original_image,
-                                               self.current_rotation,
-                                               self.image_scale)
+            # get resize the view pos rect as it changes during rotation
+            self.view_pos_rect.size = self.image.get_size()
 
-        self.view_pos_rect.size = self.image.get_size()
+            # move the player
+            if self.move_up:
+                self.position += self.world_facing_vector * self.speed * time_delta
+            if self.move_down:
+                self.position -= self.world_facing_vector * self.speed * time_delta
 
-        # Movement code including boundary box for the player
-        if self.move_up and (self.position.y > 0):
-            self.position += self.world_facing_vector * self.speed * time_delta
-        if self.move_down and (self.position.y < 655):
-            self.position -= self.world_facing_vector * self.speed * time_delta
+            # update fire timer
+            if self.shooting_fire_timer > self.shooting_fire_rate:
+                self.ready_to_shoot = True
+            else:
+                self.shooting_fire_timer += time_delta
 
+            # make a bullet
+            if self.shooting and self.ready_to_shoot:
+                self.create_bullet()
 
-        # make a bullet
-        if self.shooting:
-            self.create_bullet()
+            # update bullets
+            for bullet in self.bullet_list:
+                bullet.update(time_delta, camera)
 
-        # update asteroids
-        for bullet in self.bullet_list:
-            bullet.update(time_delta, camera)
+            # checks to see if the player should stop moving
+            player_view_pos = (self.position.x - camera.viewport_rect.left,
+                               self.position.y - camera.viewport_rect.top)
+            self.view_pos_rect.center = player_view_pos
 
-        # checks to see if the player should stop moving
-        player_view_pos = (self.position.x - camera.viewport_rect.left,
-                           self.position.y - camera.viewport_rect.top)
-        self.view_pos_rect.center = player_view_pos
-
-    # create an asteroid
+    # create a bullet
     def create_bullet(self):
         # set variables to False, so timer restarts
         self.shooting = False
-        self.bullet_fire_timer = 0.0
+        self.ready_to_shoot = False
+        self.shooting_fire_timer = 0.0
 
         # update bullet position with the camera's position
-        bullet_position = (int(self.position.x - (53 * self.image_scale)),
-                             int(self.position.y - (64 * self.image_scale)))
-        self.bullet_list.append(Bullet(self.bullet_texture, bullet_position, self.world_facing_vector))
-
+        bullet_position = (int(self.position.x),
+                           int(self.position.y))
+        # make bullet and append it to the bullet list
+        self.bullet_list.append(Bullet(bullet_texture=self.bullet_texture,
+                                       position=bullet_position,
+                                       direction=self.world_facing_vector,
+                                       all_sprites_group=self.all_sprites_group,
+                                       player_shots_group=self.player_shots_group))
 
     def draw(self, window_surface):
         window_surface.blit(self.image, self.view_pos_rect)
 
-        # draw asteroids
+        # draw bullets
         for bullet in self.bullet_list:
             bullet.draw(self.window_surface)
 
