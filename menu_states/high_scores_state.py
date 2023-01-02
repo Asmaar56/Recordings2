@@ -1,10 +1,12 @@
+import csv
+
 # import pygame
 from pygame import Surface, Rect
 from pygame.event import Event
 
 # import pygame_gui
 from pygame_gui import UIManager, UI_BUTTON_PRESSED
-from pygame_gui.elements import UIButton
+from pygame_gui.elements import UIButton, UILabel
 
 # import parent class
 from IAppState import IAppState
@@ -25,6 +27,8 @@ class HighScoresState(IAppState):  # class inherits from IAppState
         # button variables
         self.return_to_main_menu_button = None
 
+        self.level_labels_list = []
+
     def start(self):  # called when this state first appears
 
         # add a background to the window
@@ -41,12 +45,42 @@ class HighScoresState(IAppState):  # class inherits from IAppState
         self.return_to_main_menu_button = UIButton(relative_rect=return_to_main_menu_button_rect,
                                                    text="Return to main menu",
                                                    manager=self.ui_manager)
+        self.load_high_scores()
+
+    def load_high_scores(self):
+        high_scores_data = []
+        with open('player_data.csv', 'r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for line in csv_reader:
+                high_scores_data.append(line)
+
+        label_position_increment = 0
+        for level_data in high_scores_data:
+
+            # relative_rect
+            label_pos_rect = Rect(0, 0, 400, 40)
+            label_pos_rect.centerx = self.window_surface.get_rect().centerx
+            label_pos_rect.top = (self.window_surface.get_height() * 0.2) + label_position_increment
+
+            label_text = 'Level ' + level_data['level'] + ' coins collected: ' + level_data['coins']
+
+            # make uiLabel
+            self.level_labels_list.append(
+                UILabel(relative_rect=label_pos_rect,
+                        text=label_text,
+                        manager=self.ui_manager)
+            )
+            label_position_increment += 100
 
     def stop(self):  # called when state is closed
         self.background_surface = None  # remove background
 
         self.return_to_main_menu_button.kill()  # destroy button
         self.return_to_main_menu_button = None  # reset button variable
+
+        for label in self.level_labels_list:
+            label.kill()
+        self.level_labels_list = []
 
     def process_event(self, event: Event):  # takes event as parameter
         self.ui_manager.process_events(event)  # call  builtin process_events

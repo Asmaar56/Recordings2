@@ -10,6 +10,9 @@ class Coin(pygame.sprite.Sprite):
                  all_sprites_group: pygame.sprite.Group):
 
         super().__init__(player_collision_group, all_sprites_group)
+        print(player_collision_group)
+
+        self.type = 'coin'
 
         # image variables
         self.original_image = coin_texture
@@ -41,6 +44,7 @@ class Coin(pygame.sprite.Sprite):
             coin_view_pos = (self.position.x - camera.viewport_rect.left,
                              self.position.y - camera.viewport_rect.top)
             self.view_pos_rect.center = coin_view_pos
+
 
     def draw(self, window_surface):
         # draw the image with the camera's position

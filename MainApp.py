@@ -17,6 +17,12 @@ from menu_states.new_character_state import NewCharacterState
 from menu_states.equipment_state import EquipmentState
 from menu_states.load_prior_data_state import LoadPriorDataState
 from level_states.level_1_state import Level1State
+from level_states.level_2_state import Level2State
+from level_states.level_3_state import Level3State
+from level_states.level_4_state import Level4State
+from level_states.victory_state import VictoryState
+from level_states.
+
 
 
 # Create main game app
@@ -67,7 +73,19 @@ class MainApp:
                                                                        self.ui_manager),
                            'level_1_state': Level1State(self.window_surface,
                                                         self.window_size,
-                                                        self.ui_manager)
+                                                        self.ui_manager),
+                           'level_2_state': Level2State(self.window_surface,
+                                                        self.window_size,
+                                                        self.ui_manager),
+                           'level_3_state': Level3State(self.window_surface,
+                                                        self.window_size,
+                                                        self.ui_manager),
+                           'level_4_state': Level4State(self.window_surface,
+                                                        self.window_size,
+                                                        self.ui_manager),
+                           'victory_state': VictoryState(self.window_surface,
+                                                         self.window_size,
+                                                         self.ui_manager)
                            }
 
         # set active state to main menu initially

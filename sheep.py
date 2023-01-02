@@ -14,6 +14,8 @@ class Sheep(pygame.sprite.Sprite):
         super().__init__(all_sprites_group)  # inherit from all sprites group
         self.player_shots_group = player_shots_group
 
+        self.type = 'enemy'
+
         # image variables
         self.original_image = sheep_texture
         self.image: pygame.Surface = self.original_image.copy()

@@ -23,14 +23,14 @@ class Player(pygame.sprite.Sprite):
         # make a copy of the player's image
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect()  # set rect to have same boundaries as image
-        self.image_scale = 0.5  # resize the iamge
+        self.image_scale = 0.5  # resize the image
 
         self.position = pygame.Vector2(500.0, 400.0)  # spawn location for the player
         self.rect.center = (int(self.position.x), int(self.position.y))
         self.view_pos_rect = self.rect.copy()  # set dimensions to pos rect dimensions
         self.world_facing_vector = pygame.Vector2(0.0, -1.0)  # vertically upwards for rotation
 
-        self.speed = 300.0  # player speed (in pixels)
+        self.speed = 3000.0  # player speed (in pixels)
         self.move_up = False  # is movement key pressed?
         self.move_down = False
 
@@ -72,7 +72,7 @@ class Player(pygame.sprite.Sprite):
             player_coin_collisions = pygame.sprite.spritecollide(self,
                                                                  self.player_collision_group,
                                                                  False)
-            # kill player and coin if they touch
+            # kill coin if the player touches it
             if player_coin_collisions:
                 for coin in player_coin_collisions:
                     coin.kill()

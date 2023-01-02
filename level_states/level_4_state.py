@@ -12,7 +12,7 @@ from coin import Coin
 from level_states.level_1_data import level_data
 
 
-class Level1State(IAppState):
+class Level4State(IAppState):
 
     def __init__(self,
                  window_surface: pygame.Surface,
@@ -22,7 +22,7 @@ class Level1State(IAppState):
                          window_size,
                          ui_manager)
 
-        self.level = 1  # what level is this
+        self.level = 4  # what level is this
 
         # inherited variables
         self.window_size = window_size
@@ -76,7 +76,7 @@ class Level1State(IAppState):
 
         #  background texture for the level
         self.background_texture = pygame.transform.smoothscale(
-            pygame.image.load('level_states/game_images/level_1_image.png').convert(),
+            pygame.image.load('level_states/game_images/level_4_image.jpg').convert(),
             self.world_bounds)
 
         self.make_level()
@@ -160,19 +160,13 @@ class Level1State(IAppState):
             if event.key == pygame.K_p:  # return to menu
                 self.should_transition = True  # this is returned in return_should_transition()
                 self.transition_target = 'main_menu_state'  # switch to main menu
-                print('KEY P pressed in LEVEL1STATE')
+                print('KEY P pressed in LEVEL4STATE')
 
     def update(self, time_delta: float):  # update the elements
         self.camera.update(time_delta, self.player.position)  # update camera
 
-        enemies_exist = False
         for tile in self.tile_list:  # update level
-            if tile.alive() and tile.type == 'enemy':
-                enemies_exist = True
-                tile.update(time_delta, self.camera)
-        if not enemies_exist:
-            self.should_transition = True
-            self.transition_target = 'victory_state'
+            tile.update(time_delta, self.camera)
 
         self.player.update(time_delta, self.camera)  # update player
         self.ui_manager.update(time_delta)  # update ui elements
