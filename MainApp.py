@@ -21,7 +21,7 @@ from level_states.level_2_state import Level2State
 from level_states.level_3_state import Level3State
 from level_states.level_4_state import Level4State
 from level_states.victory_state import VictoryState
-from level_states.
+from level_states.defeat_state import DefeatState
 
 
 
@@ -85,7 +85,10 @@ class MainApp:
                                                         self.ui_manager),
                            'victory_state': VictoryState(self.window_surface,
                                                          self.window_size,
-                                                         self.ui_manager)
+                                                         self.ui_manager),
+                           'defeat_state': DefeatState(self.window_surface,
+                                                       self.window_size,
+                                                       self.ui_manager)
                            }
 
         # set active state to main menu initially

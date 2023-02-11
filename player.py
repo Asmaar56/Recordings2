@@ -9,12 +9,14 @@ class Player(pygame.sprite.Sprite):
                  window_surface,
                  player_shots_group: pygame.sprite.Group,
                  player_collision_group: pygame.sprite.Group,
-                 all_sprites_group: pygame.sprite.Group):
+                 all_sprites_group: pygame.sprite.Group,
+                 enemy_group: pygame.sprite.Group):
 
         super().__init__(all_sprites_group)
         self.all_sprites_group = all_sprites_group
         self.player_shots_group = player_shots_group
         self.player_collision_group = player_collision_group
+        self.enemy_group = enemy_group
 
         # initialise parameters
         self.world_bounds = world_bounds
@@ -30,7 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.view_pos_rect = self.rect.copy()  # set dimensions to pos rect dimensions
         self.world_facing_vector = pygame.Vector2(0.0, -1.0)  # vertically upwards for rotation
 
-        self.speed = 3000.0  # player speed (in pixels)
+        self.speed = 300.0  # player speed (in pixels)
         self.move_up = False  # is movement key pressed?
         self.move_down = False
 
@@ -47,6 +49,7 @@ class Player(pygame.sprite.Sprite):
         self.shooting_fire_timer = 0.0  # counter since last bullet creation
 
         self.coins_collected = 0
+        self.enemies_killed = 0
 
     def process_events(self, event):
         # inputs are handled here
@@ -72,11 +75,17 @@ class Player(pygame.sprite.Sprite):
             player_coin_collisions = pygame.sprite.spritecollide(self,
                                                                  self.player_collision_group,
                                                                  False)
+            player_enemy_collisions = pygame.sprite.spritecollide(self,
+                                                                  self.enemy_group,
+                                                                  False)
             # kill coin if the player touches it
             if player_coin_collisions:
                 for coin in player_coin_collisions:
                     coin.kill()
                     self.coins_collected += 1
+            if player_enemy_collisions:
+                self.kill()
+
             self.rect.center = self.position
 
             # rotation needs mouse position relative to upwards facing vector
@@ -115,12 +124,16 @@ class Player(pygame.sprite.Sprite):
 
             # update bullets
             for bullet in self.bullet_list:
-                bullet.update(time_delta, camera)
+                if bullet.update(time_delta, camera):
+                    self.enemies_killed += 1
 
             # checks to see if the player should stop moving
             player_view_pos = (self.position.x - camera.viewport_rect.left,
                                self.position.y - camera.viewport_rect.top)
             self.view_pos_rect.center = player_view_pos
+        else:
+            print('dead')
+            return True
 
     # create a bullet
     def create_bullet(self):

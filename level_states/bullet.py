@@ -54,6 +54,8 @@ class Bullet(pygame.sprite.Sprite):
             bullet_view_pos = (self.position.x - camera.viewport_rect.left,
                                self.position.y - camera.viewport_rect.top)
             self.view_pos_rect.center = bullet_view_pos
+        else:
+            return True
 
     def draw(self, window_surface):
         # draw the image with the camera's position

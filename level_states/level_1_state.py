@@ -12,6 +12,7 @@ from coin import Coin
 from level_states.level_1_data import level_data
 
 
+
 class Level1State(IAppState):
 
     def __init__(self,
@@ -32,6 +33,7 @@ class Level1State(IAppState):
         self.all_sprites = None
         self.player_shots = None
         self.player_collision_group = None
+        self.enemy_group = None
 
         # background variables
         self.background_texture = None
@@ -55,6 +57,7 @@ class Level1State(IAppState):
         self.all_sprites = pygame.sprite.Group()
         self.player_shots = pygame.sprite.Group()
         self.player_collision_group = pygame.sprite.Group()
+        self.enemy_group = pygame.sprite.Group()
 
         # centre of the world is set to size of window
         # so the world is 2x the size of the window
@@ -72,7 +75,8 @@ class Level1State(IAppState):
                              window_surface=self.window_surface,
                              player_shots_group=self.player_shots,
                              player_collision_group=self.player_collision_group,
-                             all_sprites_group=self.all_sprites)
+                             all_sprites_group=self.all_sprites,
+                             enemy_group=self.enemy_group)
 
         #  background texture for the level
         self.background_texture = pygame.transform.smoothscale(
@@ -97,7 +101,8 @@ class Level1State(IAppState):
                     self.tile_list.append(Sheep(sheep_texture=sheep_texture,
                                                 position=(pos_x, pos_y),
                                                 player_shots_group=self.player_shots,
-                                                all_sprites_group=self.all_sprites))
+                                                all_sprites_group=self.all_sprites,
+                                                enemy_group=self.enemy_group))
                 if tile == 2:
                     pos_x = column_counter * self.tile_size
                     pos_y = row_counter * self.tile_size
@@ -144,6 +149,10 @@ class Level1State(IAppState):
         player_coins += self.player.coins_collected
         player_data[self.level - 1]['coins'] = player_coins
 
+        player_kills = int(player_data[self.level - 1]['kills'])
+        player_kills += self.player.enemies_killed
+        player_data[self.level - 1]['kills'] = player_kills
+
         with open('player_data.csv', 'w') as csv_file:  # re-write the data
             fieldnames = player_data[0].keys()  # field names shouldn't get deleted
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -167,14 +176,17 @@ class Level1State(IAppState):
 
         enemies_exist = False
         for tile in self.tile_list:  # update level
-            if tile.alive() and tile.type == 'enemy':
-                enemies_exist = True
+            if tile.alive():
                 tile.update(time_delta, self.camera)
+                if tile.type == 'enemy':
+                    enemies_exist = True
         if not enemies_exist:
             self.should_transition = True
             self.transition_target = 'victory_state'
 
-        self.player.update(time_delta, self.camera)  # update player
+        if self.player.update(time_delta, self.camera):  # update player
+            self.should_transition = True  # if they are dead, transition
+            self.transition_target = 'defeat_state'
         self.ui_manager.update(time_delta)  # update ui elements
 
     def draw(self):  # draw elements on screen

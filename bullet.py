@@ -49,21 +49,22 @@ class Bullet(pygame.sprite.Sprite):  # bullet is a sprite
 
 
     def update(self, time_delta: float, camera):
-        move_vector = self.direction.copy()
-        move_vector.scale_to_length(self.speed * time_delta)
-        self.position += move_vector
+        if self.alive():
+            move_vector = self.direction.copy()
+            move_vector.scale_to_length(self.speed * time_delta)
+            self.position += move_vector
 
-        self.rect.center = self.position  # update image position
+            self.rect.center = self.position  # update image position
 
-        # rotate image
-        self.current_rotation += 20.0 * time_delta
-        self.image = pygame.transform.rotate(self.original_image, self.current_rotation)
+            # rotate image
+            self.current_rotation += 20.0 * time_delta
+            self.image = pygame.transform.rotate(self.original_image, self.current_rotation)
 
-        # update image position with camera
-        asteroid_view_pos = (self.position.x - camera.viewport_rect.left,
-                             self.position.y - camera.viewport_rect.top)
-        self.view_pos_rect.center = asteroid_view_pos
+            # update image position with camera
+            asteroid_view_pos = (self.position.x - camera.viewport_rect.left,
+                                 self.position.y - camera.viewport_rect.top)
+            self.view_pos_rect.center = asteroid_view_pos
 
     def draw(self, window_surface):
-
-        window_surface.blit(self.image, self.view_pos_rect)
+        if self.alive():
+            window_surface.blit(self.image, self.view_pos_rect)

@@ -62,7 +62,9 @@ class HighScoresState(IAppState):  # class inherits from IAppState
             label_pos_rect.centerx = self.window_surface.get_rect().centerx
             label_pos_rect.top = (self.window_surface.get_height() * 0.2) + label_position_increment
 
-            label_text = 'Level ' + level_data['level'] + ' coins collected: ' + level_data['coins']
+            label_text = 'Level ' + level_data['level'] + \
+                         ' | coins collected: ' + level_data['coins'] + \
+                         '| kills: ' + level_data['kills']
 
             # make uiLabel
             self.level_labels_list.append(

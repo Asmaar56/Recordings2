@@ -39,8 +39,8 @@ class DefeatState(IAppState):  # class inherits from IAppState
         defeat_text_label_pos_rect.centerx = self.window_surface.get_rect().centerx
         defeat_text_label_pos_rect.top = self.window_surface.get_height() * 0.3
         self.defeat_label = UILabel(relative_rect=defeat_text_label_pos_rect,
-                                     text="Game over",
-                                     manager=self.ui_manager)
+                                    text="Game over",
+                                    manager=self.ui_manager)
 
         # create return to player menu button
         return_to_player_menu_button_pos_rect = Rect(0, 0, 150, 40)
@@ -65,4 +65,4 @@ class DefeatState(IAppState):  # class inherits from IAppState
             if event.ui_element == self.return_to_player_menu_button:  # if return to player menu pressed
                 self.should_transition = True  # this is returned in return_should_transition()
                 self.transition_target = 'main_menu_state'  # switch to player menu
-                print('RETURN MAIN MENU button pressed in VICTORYSTATE')
+                print('RETURN MAIN MENU button pressed in DEFEATSTATE')

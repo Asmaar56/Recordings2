@@ -9,9 +9,10 @@ class Sheep(pygame.sprite.Sprite):
                  sheep_texture: pygame.Surface,
                  position: Tuple[int, int],
                  player_shots_group: pygame.sprite.Group,
-                 all_sprites_group: pygame.sprite.Group):
+                 all_sprites_group: pygame.sprite.Group,
+                 enemy_group: pygame.sprite.Group):
 
-        super().__init__(all_sprites_group)  # inherit from all sprites group
+        super().__init__(all_sprites_group, enemy_group)  # inherit from all sprites group
         self.player_shots_group = player_shots_group
 
         self.type = 'enemy'
